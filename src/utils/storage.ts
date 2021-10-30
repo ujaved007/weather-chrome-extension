@@ -7,6 +7,7 @@ export interface LocalStorage {
 
 export interface LocalStorageOptions {
 	tempScale: OpenWeatherTempScale;
+	homeCity: string;
 }
 
 export type LocalStorageKeys = keyof LocalStorage;
