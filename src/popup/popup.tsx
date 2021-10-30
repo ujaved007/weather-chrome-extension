@@ -7,14 +7,22 @@ import "fontsource-roboto";
 import "./popup.css";
 import WeatherCard from "./WeatherCard/WeatherCard";
 import { fetchOpenWeatherData } from "../utils/api";
-import { setStoredCities, getStoredCities } from "../utils/storage";
+import {
+	setStoredCities,
+	getStoredCities,
+	setStoredOptions,
+	getStoredOptions,
+	LocalStorageOptions,
+} from "../utils/storage";
 
 const App: React.FC<{}> = () => {
 	const [cities, setCities] = useState<string[]>([]);
 	const [cityInput, setCityInput] = useState<string>("");
+	const [options, setOptions] = useState<LocalStorageOptions | null>(null);
 
 	useEffect(() => {
 		getStoredCities().then((cities) => setCities(cities));
+		getStoredOptions().then((options) => setOptions(options));
 	}, []);
 
 	const handleCityClick = () => {
@@ -34,9 +42,21 @@ const App: React.FC<{}> = () => {
 			setCities(updatedCities);
 		});
 	};
+	const handleTempScaleButtonClick = () => {
+		const updateOptions: LocalStorageOptions = {
+			...options,
+			tempScale: options.tempScale === "metric" ? "imperial" : "metric",
+		};
+		setStoredOptions(updateOptions).then(() => {
+			setOptions(updateOptions);
+		});
+	};
+	if (!options) {
+		return null;
+	}
 	return (
-		<Box>
-			<Grid container>
+		<Box mx="8px" my="16px">
+			<Grid container justify="space-evenly">
 				<Grid item>
 					<Paper>
 						<Box px="15px">
@@ -51,6 +71,15 @@ const App: React.FC<{}> = () => {
 						</Box>
 					</Paper>
 				</Grid>
+				<Grid>
+					<Box>
+						<Paper>
+							<IconButton onClick={handleTempScaleButtonClick}>
+								{options.tempScale === "metric" ? "\u2103" : "\u2109"}
+							</IconButton>
+						</Paper>
+					</Box>
+				</Grid>
 			</Grid>
 			{cities.map((city, index) => {
 				return (
@@ -58,6 +87,7 @@ const App: React.FC<{}> = () => {
 						city={city}
 						key={index}
 						onDelete={() => handleCityDelete(index)}
+						tempScale={options.tempScale}
 					/>
 				);
 			})}

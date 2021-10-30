@@ -7,7 +7,11 @@ import {
 	CardActions,
 	Button,
 } from "@material-ui/core";
-import { fetchOpenWeatherData, OpenWeatherData } from "../../utils/api";
+import {
+	fetchOpenWeatherData,
+	OpenWeatherData,
+	OpenWeatherTempScale,
+} from "../../utils/api";
 
 const WeatherCardContainer: React.FC<{
 	children: React.ReactNode;
@@ -33,13 +37,14 @@ type WeatherCardState = "loading" | "ready" | "error";
 
 const WeatherCard: React.FC<{
 	city: string;
+	tempScale: OpenWeatherTempScale;
 	onDelete?: () => void;
-}> = ({ city, onDelete }) => {
+}> = ({ city, onDelete, tempScale }) => {
 	const [weatherData, setWeatherData] = useState<OpenWeatherData | null>(null);
 	const [cardState, setCardState] = useState<WeatherCardState>("loading");
 
 	useEffect(() => {
-		fetchOpenWeatherData(city)
+		fetchOpenWeatherData(city, tempScale)
 			.then((data) => {
 				setWeatherData(data);
 				setCardState("ready");
@@ -48,7 +53,7 @@ const WeatherCard: React.FC<{
 				console.log(err);
 				setCardState("error");
 			});
-	}, [city]);
+	}, [city, tempScale]);
 
 	if (cardState == "loading" || cardState == "error") {
 		return (
@@ -65,10 +70,12 @@ const WeatherCard: React.FC<{
 			<CardContent>
 				<Typography variant="h5">{weatherData.name} </Typography>
 				<Typography variant="body1">
-					{Math.round(weatherData.main.temp)}{" "}
+					{Math.round(weatherData.main.temp)}
+					{tempScale === "metric" ? "°C" : "°F"}
 				</Typography>
 				<Typography variant="body1">
-					Feels Like: {Math.round(weatherData.main.feels_like)}{" "}
+					Feels Like: {Math.round(weatherData.main.feels_like)}
+					{tempScale === "metric" ? "°C" : "°F"}
 				</Typography>
 			</CardContent>
 		</WeatherCardContainer>
